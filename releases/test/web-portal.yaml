@@ -1,0 +1,9 @@
+appName: web-portal
+envName: test
+cluster: test-cluster-a
+type: frontend
+
+image:
+  tag: test-initial
+
+enabled: true

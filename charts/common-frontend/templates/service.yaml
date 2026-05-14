@@ -1,0 +1,18 @@
+{{- if and .Values.enabled .Values.service.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "common.fullname" . }}
+  labels:
+    {{- include "common.labels" . | nindent 4 }}
+spec:
+  type: {{ default "ClusterIP" .Values.service.type }}
+  selector:
+    app.kubernetes.io/name: {{ include "common.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - port: {{ default 80 .Values.service.port }}
+      targetPort: {{ default .Values.containerPort .Values.service.targetPort }}
+      protocol: TCP
+      name: http
+{{- end }}

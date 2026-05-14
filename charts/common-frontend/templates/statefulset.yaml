@@ -1,0 +1,44 @@
+{{- if and .Values.enabled (eq (default "Deployment" .Values.workloadType) "StatefulSet") }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "common.fullname" . }}
+  labels:
+    {{- include "common.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ default (include "common.fullname" .) .Values.statefulset.serviceName }}
+  replicas: {{ default 1 .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "common.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        {{- include "common.labels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ include "common.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ default "IfNotPresent" .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ default 8080 .Values.containerPort }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+  {{- with .Values.statefulset.volumeClaimTemplates }}
+  volumeClaimTemplates:
+    {{- range $tpl := . }}
+    - metadata:
+        name: {{ $tpl.name }}
+      spec:
+        accessModes:
+          {{- toYaml $tpl.accessModes | nindent 10 }}
+        {{- if $tpl.storageClassName }}
+        storageClassName: {{ $tpl.storageClassName }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ $tpl.size }}
+    {{- end }}
+  {{- end }}
+{{- end }}

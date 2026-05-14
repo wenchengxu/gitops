@@ -1,0 +1,46 @@
+appName: nfs-data-provisioner
+type: infrastructure
+chart: common-infrastructure
+
+image:
+  repository: easzlab/nfs-subdir-external-provisioner
+
+service:
+  enabled: false
+
+ingress:
+  enabled: false
+
+readinessProbe:
+  enabled: false
+
+livenessProbe:
+  enabled: false
+
+serviceAccount:
+  create: true
+  name: nfs-data-provisioner
+
+rbac:
+  create: true
+  clusterRole:
+    create: true
+    name: nfs-data-provisioner-clusterrole
+  role:
+    create: true
+    name: nfs-data-provisioner-role
+
+# StorageClass 基础配置，name 和 provisioner 由 releases 按环境覆盖
+storageClass:
+  enabled: true
+  defaultClass: false
+  allowVolumeExpansion: true
+  reclaimPolicy: Delete
+  volumeBindingMode: Immediate
+  parameters:
+    archiveOnDelete: "false"
+
+# replicaCount 强制为 1，NFS Provisioner 不允许多副本
+replicaCount: 1
+
+owner: platform-team

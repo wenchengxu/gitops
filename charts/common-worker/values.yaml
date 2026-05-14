@@ -1,0 +1,142 @@
+appName: app
+
+workloadType: Deployment
+
+replicaCount: 1
+
+image:
+  repository: ""
+  tag: ""
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+serviceAccount:
+  create: false
+  name: ""
+  annotations: {}
+
+rbac:
+  create: false
+  clusterRole:
+    create: false
+    name: ""
+    rules: []
+  role:
+    create: false
+    name: ""
+    rules: []
+
+storageClass:
+  enabled: false
+  name: ""
+  provisioner: ""
+  defaultClass: false
+  allowVolumeExpansion: true
+  reclaimPolicy: Delete
+  volumeBindingMode: Immediate
+  parameters: {}
+  mountOptions: []
+
+persistentVolumes:
+  enabled: false
+  items: []
+
+persistentVolumeClaims:
+  enabled: false
+  items: []
+
+podAnnotations: {}
+podLabels: {}
+
+containerPort: 8080
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: false
+  className: ""
+  host: ""
+  hostPrefix: ""
+  domainSuffix: ""
+  path: /
+  pathType: Prefix
+  tls:
+    enabled: false
+    secretName: ""
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+hpa:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+
+readinessProbe:
+  enabled: true
+  path: /health
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+livenessProbe:
+  enabled: true
+  path: /health
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+env: []
+envFrom: []
+command: []
+args: []
+
+configMap:
+  enabled: false
+  data: {}
+
+persistence:
+  enabled: false
+  volumes: []
+  # Volume item example:
+  # - name: data
+  #   type: nfs # pvc | existingPvc | emptyDir | configMap | secret | hostPath | nfs
+  #   mountPath: /data
+  #   subPath: ""
+  #   readOnly: false
+  #   nfs:
+  #     server: 10.110.128.13
+  #     path: /bayuegua-nfs
+  #     readOnly: false
+
+statefulset:
+  serviceName: ""
+  volumeClaimTemplates: []
+
+initContainers: []
+sidecars: []
+
+# 集群级默认存储类，由 clusters/<cluster>.yaml 覆盖
+storageClassName: ""
+
+# NFS 服务器清单，由 clusters/<cluster>.yaml 覆盖
+nfsServers: {}
+
+enabled: true

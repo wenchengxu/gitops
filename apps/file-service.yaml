@@ -1,0 +1,34 @@
+appName: file-service
+type: backend
+chart: common-backend
+
+image:
+  repository: harbor.example.com/backend/file-service
+
+containerPort: 8080
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+
+ingress:
+  enabled: true
+  path: /
+
+health:
+  path: /actuator/health
+
+# 文件服务需要持久化存储
+# 使用 nfsRef 引用集群配置中定义的 NFS 服务器，不再硬编码 IP 和路径
+persistence:
+  enabled: true
+  volumes:
+    - name: upload-data
+      type: nfs
+      mountPath: /data/upload
+      readOnly: false
+      nfsRef: main
+
+owner: backend-team

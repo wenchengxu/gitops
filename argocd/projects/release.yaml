@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: release
+  namespace: argocd
+spec:
+  sourceRepos:
+    - https://git.example.com/platform/gitops-repo.git
+  destinations:
+    - name: release-cluster-a
+      namespace: release-*
+    - name: release-gpu-cluster
+      namespace: release-*
+  clusterResourceWhitelist:
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRoleBinding
+    - group: storage.k8s.io
+      kind: StorageClass
+    - group: ""
+      kind: PersistentVolume
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'

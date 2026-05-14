@@ -1,0 +1,22 @@
+{{- if and .Values.enabled .Values.storageClass.enabled }}
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ required "storageClass.name is required when storageClass.enabled=true" .Values.storageClass.name }}
+  labels:
+    {{- include "common.labels" . | nindent 4 }}
+  annotations:
+    storageclass.kubernetes.io/is-default-class: {{ ternary "true" "false" .Values.storageClass.defaultClass | quote }}
+provisioner: {{ required "storageClass.provisioner is required when storageClass.enabled=true" .Values.storageClass.provisioner }}
+allowVolumeExpansion: {{ .Values.storageClass.allowVolumeExpansion }}
+reclaimPolicy: {{ .Values.storageClass.reclaimPolicy }}
+volumeBindingMode: {{ .Values.storageClass.volumeBindingMode }}
+{{- with .Values.storageClass.parameters }}
+parameters:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- with .Values.storageClass.mountOptions }}
+mountOptions:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- end }}

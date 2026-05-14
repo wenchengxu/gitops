@@ -1,0 +1,37 @@
+appName: nfs-data-provisioner
+envName: dev
+cluster: dev-cluster-a
+type: infrastructure
+
+image:
+  tag: v4.0.1
+
+# NFS Provisioner 只允许单副本
+replicaCount: 1
+
+enabled: true
+
+# 统一 StorageClass name 为 nfs-client，与集群配置一致
+storageClass:
+  name: nfs-client
+  provisioner: k8s-sigs.io/nfs-subdir-external-provisioner
+
+env:
+  - name: TZ
+    value: Asia/Shanghai
+  - name: PROVISIONER_NAME
+    value: k8s-sigs.io/nfs-subdir-external-provisioner
+  # NFS 服务器地址，需与 clusters/dev-cluster-a.yaml 中 nfsServers.main 保持一致
+  - name: NFS_SERVER
+    value: 10.110.128.13
+  - name: NFS_PATH
+    value: /bayuegua-nfs/dev
+
+persistence:
+  enabled: true
+  volumes:
+    - name: nfs-root
+      type: nfs
+      mountPath: /persistentvolumes
+      readOnly: false
+      nfsRef: main

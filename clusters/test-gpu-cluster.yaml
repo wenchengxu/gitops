@@ -1,0 +1,30 @@
+clusterName: test-gpu-cluster
+server: https://kubernetes.default.svc
+
+namespacePrefix: test
+
+ingress:
+  className: nginx
+  domainSuffix: test.example.com
+
+imagePullSecrets:
+  - name: harbor-secret
+
+storageClassName: ceph-rbd
+
+capabilities:
+  gpu: true
+  rwx: true
+
+nfsServers:
+  main:
+    server: 10.110.128.13
+    path: /bayuegua-nfs/test
+
+nodeSelector:
+  accelerator: nvidia
+
+tolerations:
+  - key: nvidia.com/gpu
+    operator: Exists
+    effect: NoSchedule

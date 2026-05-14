@@ -1,0 +1,28 @@
+envName: release
+
+replicaCount: 3
+
+image:
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 2000m
+    memory: 2Gi
+
+hpa:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+persistenceDefaults:
+  storageClassName: ceph-rbd
+  accessModes:
+    - ReadWriteOnce
+  size: 200Gi
+
+logLevel: warn

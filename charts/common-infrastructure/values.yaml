@@ -1,0 +1,108 @@
+appName: app
+
+workloadType: Deployment
+
+replicaCount: 1
+
+image:
+  repository: ""
+  tag: ""
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+serviceAccount:
+  create: false
+  name: ""
+  annotations: {}
+
+rbac:
+  create: false
+  clusterRole:
+    create: false
+    name: ""
+    rules: []
+  role:
+    create: false
+    name: ""
+    rules: []
+
+storageClass:
+  enabled: false
+  name: ""
+  provisioner: ""
+  defaultClass: false
+  allowVolumeExpansion: true
+  reclaimPolicy: Delete
+  volumeBindingMode: Immediate
+  parameters: {}
+  mountOptions: []
+
+podAnnotations: {}
+podLabels: {}
+
+containerPort: 8080
+
+service:
+  enabled: false
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+readinessProbe:
+  enabled: false
+  path: /health
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+livenessProbe:
+  enabled: false
+  path: /health
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+env: []
+envFrom: []
+command: []
+args: []
+
+persistence:
+  enabled: false
+  volumes: []
+  # Volume item example:
+  # - name: data
+  #   type: nfs
+  #   mountPath: /data
+  #   subPath: ""
+  #   readOnly: false
+  #   nfs:
+  #     server: 10.110.128.13
+  #     path: /bayuegua-nfs
+  #     readOnly: false
+
+initContainers: []
+sidecars: []
+
+# 集群级默认存储类，由 clusters/<cluster>.yaml 覆盖
+storageClassName: ""
+
+# NFS 服务器清单，由 clusters/<cluster>.yaml 覆盖
+nfsServers: {}
+
+enabled: true

@@ -1,0 +1,113 @@
+---
+# Source: common-gpu/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: gpu-infer
+  labels:
+    app.kubernetes.io/name: gpu-infer
+    app.kubernetes.io/instance: test-gpu
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: common-gpu-0.1.0
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: gpu-infer
+    app.kubernetes.io/instance: test-gpu
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP
+      name: http
+---
+# Source: common-gpu/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gpu-infer
+  labels:
+    app.kubernetes.io/name: gpu-infer
+    app.kubernetes.io/instance: test-gpu
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: common-gpu-0.1.0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gpu-infer
+      app.kubernetes.io/instance: test-gpu
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gpu-infer
+        app.kubernetes.io/instance: test-gpu
+        app.kubernetes.io/managed-by: Helm
+        helm.sh/chart: common-gpu-0.1.0
+    spec:
+      imagePullSecrets:
+        - name: harbor-secret
+      nodeSelector:
+        accelerator: nvidia
+      tolerations:
+        - effect: NoSchedule
+          key: nvidia.com/gpu
+          operator: Exists
+      containers:
+        - name: gpu-infer
+          image: "harbor.example.com/gpu/gpu-infer:dev-initial"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:
+            dev
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+              nvidia.com/gpu: "1"
+            requests:
+              cpu: 100m
+              memory: 256Mi
+              nvidia.com/gpu: "1"
+          volumeMounts:
+      volumes:
+---
+# Source: common-gpu/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gpu-infer
+  labels:
+    app.kubernetes.io/name: gpu-infer
+    app.kubernetes.io/instance: test-gpu
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: common-gpu-0.1.0
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: "gpu-infer.local"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gpu-infer
+                port:
+                  number: 8000

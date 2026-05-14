@@ -1,0 +1,28 @@
+appName: web-portal
+type: frontend
+chart: common-frontend
+
+image:
+  repository: harbor.example.com/frontend/web-portal
+
+containerPort: 80
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+
+ingress:
+  enabled: true
+  path: /
+
+readinessProbe:
+  enabled: true
+  path: /
+
+livenessProbe:
+  enabled: true
+  path: /
+
+owner: frontend-team

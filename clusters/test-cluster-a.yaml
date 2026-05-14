@@ -1,0 +1,25 @@
+clusterName: test-cluster-a
+server: https://kubernetes.default.svc
+
+namespacePrefix: test
+
+ingress:
+  className: nginx
+  domainSuffix: test.example.com
+
+imagePullSecrets:
+  - name: harbor-secret
+
+storageClassName: nfs-client
+
+capabilities:
+  gpu: false
+  rwx: true
+
+nfsServers:
+  main:
+    server: 10.110.128.13
+    path: /bayuegua-nfs/test
+
+nodeSelector: {}
+tolerations: []

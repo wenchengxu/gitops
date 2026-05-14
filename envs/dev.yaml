@@ -1,0 +1,25 @@
+envName: dev
+
+replicaCount: 1
+
+image:
+  pullPolicy: Always
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+hpa:
+  enabled: false
+
+persistenceDefaults:
+  storageClassName: nfs-client
+  accessModes:
+    - ReadWriteOnce
+  size: 10Gi
+
+logLevel: debug

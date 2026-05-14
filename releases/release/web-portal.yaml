@@ -1,0 +1,9 @@
+appName: web-portal
+envName: release
+cluster: release-cluster-a
+type: frontend
+
+image:
+  tag: release-initial
+
+enabled: false

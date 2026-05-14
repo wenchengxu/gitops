@@ -1,0 +1,9 @@
+appName: web-portal
+envName: dev
+cluster: dev-cluster-a
+type: frontend
+
+image:
+  tag: dev-initial
+
+enabled: true

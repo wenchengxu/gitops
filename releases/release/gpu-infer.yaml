@@ -1,0 +1,9 @@
+appName: gpu-infer
+envName: release
+cluster: release-gpu-cluster
+type: gpu
+
+image:
+  tag: release-initial
+
+enabled: false

@@ -1,0 +1,9 @@
+appName: file-service
+envName: release
+cluster: release-cluster-a
+type: backend
+
+image:
+  tag: release-initial
+
+enabled: false

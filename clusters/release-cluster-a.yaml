@@ -1,0 +1,25 @@
+clusterName: release-cluster-a
+server: https://kubernetes.default.svc
+
+namespacePrefix: release
+
+ingress:
+  className: nginx
+  domainSuffix: prod.example.com
+
+imagePullSecrets:
+  - name: harbor-secret
+
+storageClassName: ceph-rbd
+
+capabilities:
+  gpu: false
+  rwx: true
+
+nfsServers:
+  main:
+    server: 10.110.128.13
+    path: /bayuegua-nfs/release
+
+nodeSelector: {}
+tolerations: []

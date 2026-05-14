@@ -1,0 +1,26 @@
+{{- if and .Values.enabled .Values.persistentVolumeClaims.enabled }}
+{{- range $pvc := .Values.persistentVolumeClaims.items }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ required "persistentVolumeClaims.items[].name is required" $pvc.name }}
+  namespace: {{ default $.Release.Namespace $pvc.namespace }}
+spec:
+  accessModes:
+    {{- if $pvc.accessModes }}
+    {{- toYaml $pvc.accessModes | nindent 4 }}
+    {{- else }}
+    - ReadWriteMany
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ default "10Gi" $pvc.size }}
+  {{- if $pvc.storageClassName }}
+  storageClassName: {{ $pvc.storageClassName }}
+  {{- end }}
+  {{- if $pvc.volumeName }}
+  volumeName: {{ $pvc.volumeName }}
+  {{- end }}
+{{- end }}
+{{- end }}

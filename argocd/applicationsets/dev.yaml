@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: dev-apps
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+    - git:
+        repoURL: https://git.example.com/platform/gitops-repo.git
+        revision: main
+        files:
+          - path: releases/dev/*.yaml
+  template:
+    metadata:
+      name: '{{appName}}-dev'
+    spec:
+      project: dev
+      destination:
+        name: '{{cluster}}'
+        namespace: '{{envName}}-{{appName}}'
+      source:
+        repoURL: https://git.example.com/platform/gitops-repo.git
+        targetRevision: main
+        path: 'charts/common-{{type}}'
+        helm:
+          valueFiles:
+            - ../../apps/{{appName}}.yaml
+            - ../../envs/{{envName}}.yaml
+            - ../../clusters/{{cluster}}.yaml
+            - ../../releases/{{envName}}/{{appName}}.yaml
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

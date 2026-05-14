@@ -1,0 +1,9 @@
+appName: order-service
+envName: test
+cluster: test-cluster-a
+type: backend
+
+image:
+  tag: test-initial
+
+enabled: true

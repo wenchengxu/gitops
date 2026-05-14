@@ -1,0 +1,25 @@
+clusterName: dev-cluster-a
+server: https://kubernetes.default.svc
+
+namespacePrefix: dev
+
+ingress:
+  className: nginx
+  domainSuffix: dev.example.com
+
+imagePullSecrets:
+  - name: harbor-secret
+
+storageClassName: nfs-client
+
+capabilities:
+  gpu: false
+  rwx: true
+
+nfsServers:
+  main:
+    server: 10.110.128.13
+    path: /bayuegua-nfs/dev
+
+nodeSelector: {}
+tolerations: []

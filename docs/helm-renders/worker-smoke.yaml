@@ -1,0 +1,60 @@
+---
+# Source: common-worker/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-worker
+  labels:
+    app.kubernetes.io/name: order-worker
+    app.kubernetes.io/instance: test-worker
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: common-worker-0.1.0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: order-worker
+      app.kubernetes.io/instance: test-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: order-worker
+        app.kubernetes.io/instance: test-worker
+        app.kubernetes.io/managed-by: Helm
+        helm.sh/chart: common-worker-0.1.0
+    spec:
+      imagePullSecrets:
+        - name: harbor-secret
+      containers:
+        - name: order-worker
+          image: "harbor.example.com/backend/order-worker:dev-smoke"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            dev
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          volumeMounts:
+      volumes:

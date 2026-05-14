@@ -1,0 +1,157 @@
+{{- if and .Values.enabled (ne (default "Deployment" .Values.workloadType) "StatefulSet") }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "common.fullname" . }}
+  labels:
+    {{- include "common.labels" . | nindent 4 }}
+spec:
+  replicas: {{ default 1 .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "common.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        {{- include "common.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      {{- end }}
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ default (include "common.fullname" .) .Values.serviceAccount.name }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ include "common.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ default "IfNotPresent" .Values.image.pullPolicy }}
+          {{- with .Values.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - containerPort: {{ default 8080 .Values.containerPort }}
+          {{- with .Values.env }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readinessProbe.path }}
+              port: {{ default 8080 .Values.containerPort }}
+            initialDelaySeconds: {{ default 30 .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ default 10 .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ default 3 .Values.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ default 3 .Values.readinessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.path }}
+              port: {{ default 8080 .Values.containerPort }}
+            initialDelaySeconds: {{ default 60 .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ default 10 .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ default 3 .Values.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ default 3 .Values.livenessProbe.failureThreshold }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- if .Values.persistence.enabled }}
+          volumeMounts:
+            {{- range $v := .Values.persistence.volumes }}
+            - name: {{ $v.name }}
+              mountPath: {{ $v.mountPath }}
+              {{- if $v.subPath }}
+              subPath: {{ $v.subPath }}
+              {{- end }}
+              {{- if hasKey $v "readOnly" }}
+              readOnly: {{ $v.readOnly }}
+              {{- end }}
+            {{- end }}
+          {{- end }}
+        {{- with .Values.sidecars }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- if .Values.persistence.enabled }}
+      volumes:
+        {{- range $v := .Values.persistence.volumes }}
+        - name: {{ $v.name }}
+          {{- if eq $v.type "existingPvc" }}
+          persistentVolumeClaim:
+            claimName: {{ $v.existingClaim }}
+          {{- else if eq $v.type "emptyDir" }}
+          emptyDir:
+            {{- with $v.emptyDir }}
+            {{- toYaml . | nindent 12 }}
+            {{- else }}
+            {}
+            {{- end }}
+          {{- else if eq $v.type "configMap" }}
+          configMap:
+            name: {{ $v.configMapName }}
+          {{- else if eq $v.type "secret" }}
+          secret:
+            secretName: {{ $v.secretName }}
+          {{- else if eq $v.type "hostPath" }}
+          hostPath:
+            path: {{ $v.hostPath }}
+            {{- if $v.hostPathType }}
+            type: {{ $v.hostPathType }}
+            {{- end }}
+          {{- else if eq $v.type "nfs" }}
+          nfs:
+            {{- if $v.nfsRef }}
+            {{- $nfsServer := index $.Values.nfsServers $v.nfsRef }}
+            server: {{ required (printf "nfsServers.%s.server not found" $v.nfsRef) $nfsServer.server | quote }}
+            path: {{ required (printf "nfsServers.%s.path not found" $v.nfsRef) $nfsServer.path | quote }}
+            {{- if hasKey $nfsServer "readOnly" }}
+            readOnly: {{ $nfsServer.readOnly }}
+            {{- end }}
+            {{- else }}
+            server: {{ required "nfs.server is required when persistence volume type is nfs" $v.nfs.server | quote }}
+            path: {{ required "nfs.path is required when persistence volume type is nfs" $v.nfs.path | quote }}
+            {{- if hasKey $v.nfs "readOnly" }}
+            readOnly: {{ $v.nfs.readOnly }}
+            {{- end }}
+            {{- end }}
+          {{- else if eq $v.type "pvc" }}
+          persistentVolumeClaim:
+            claimName: {{ printf "%s-%s" (include "common.fullname" $) $v.name }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+{{- end }}

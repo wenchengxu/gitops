@@ -1,0 +1,9 @@
+appName: algorithm-service
+envName: test
+cluster: test-cluster-a
+type: algorithm
+
+image:
+  tag: test-initial
+
+enabled: true

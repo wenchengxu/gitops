@@ -1,0 +1,9 @@
+appName: gpu-infer
+envName: test
+cluster: test-gpu-cluster
+type: gpu
+
+image:
+  tag: test-initial
+
+enabled: true

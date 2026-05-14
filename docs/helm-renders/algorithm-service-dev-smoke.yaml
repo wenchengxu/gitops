@@ -1,0 +1,105 @@
+---
+# Source: common-algorithm/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: algorithm-service
+  labels:
+    app.kubernetes.io/name: algorithm-service
+    app.kubernetes.io/instance: test-algorithm
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: common-algorithm-0.1.0
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: algorithm-service
+    app.kubernetes.io/instance: test-algorithm
+  ports:
+    - port: 9000
+      targetPort: 9000
+      protocol: TCP
+      name: http
+---
+# Source: common-algorithm/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: algorithm-service
+  labels:
+    app.kubernetes.io/name: algorithm-service
+    app.kubernetes.io/instance: test-algorithm
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: common-algorithm-0.1.0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: algorithm-service
+      app.kubernetes.io/instance: test-algorithm
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: algorithm-service
+        app.kubernetes.io/instance: test-algorithm
+        app.kubernetes.io/managed-by: Helm
+        helm.sh/chart: common-algorithm-0.1.0
+    spec:
+      imagePullSecrets:
+        - name: harbor-secret
+      containers:
+        - name: algorithm-service
+          image: "harbor.example.com/algorithm/algorithm-service:dev-smoke"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9000
+          env:
+            dev
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 9000
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 9000
+            initialDelaySeconds: 180
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          volumeMounts:
+      volumes:
+---
+# Source: common-algorithm/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: algorithm-service
+  labels:
+    app.kubernetes.io/name: algorithm-service
+    app.kubernetes.io/instance: test-algorithm
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: common-algorithm-0.1.0
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: "algorithm-service.local"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: algorithm-service
+                port:
+                  number: 9000

@@ -1,0 +1,43 @@
+{{- if and .Values.enabled .Values.persistentVolumes.enabled }}
+{{- range $pv := .Values.persistentVolumes.items }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ required "persistentVolumes.items[].name is required" $pv.name }}
+spec:
+  capacity:
+    storage: {{ default "20Gi" $pv.capacity }}
+  accessModes:
+    {{- if $pv.accessModes }}
+    {{- toYaml $pv.accessModes | nindent 4 }}
+    {{- else }}
+    - ReadWriteMany
+    {{- end }}
+  persistentVolumeReclaimPolicy: {{ default "Retain" $pv.reclaimPolicy }}
+  {{- if $pv.storageClassName }}
+  storageClassName: {{ $pv.storageClassName }}
+  {{- end }}
+  {{- with $pv.mountOptions }}
+  mountOptions:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $pv.claimRef }}
+  claimRef:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if $pv.nfsRef }}
+  {{- $nfsServer := index $.Values.nfsServers $pv.nfsRef }}
+  nfs:
+    server: {{ required (printf "nfsServers.%s.server not found" $pv.nfsRef) $nfsServer.server | quote }}
+    path: {{ required (printf "nfsServers.%s.path not found" $pv.nfsRef) $nfsServer.path | quote }}
+  {{- else }}
+  nfs:
+    server: {{ required "persistentVolumes.items[].nfs.server is required" $pv.nfs.server | quote }}
+    path: {{ required "persistentVolumes.items[].nfs.path is required" $pv.nfs.path | quote }}
+    {{- if hasKey $pv.nfs "readOnly" }}
+    readOnly: {{ $pv.nfs.readOnly }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- end }}

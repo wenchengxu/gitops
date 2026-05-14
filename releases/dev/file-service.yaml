@@ -1,0 +1,7 @@
+appName: file-service
+envName: dev
+cluster: dev-cluster-a
+type: backend
+image:
+  tag: dev-initial
+enabled: true

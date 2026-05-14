@@ -1,0 +1,23 @@
+{{- if and .Values.enabled .Values.persistence.enabled }}
+{{- range $v := .Values.persistence.volumes }}
+{{- if and (eq $v.type "pvc") $v.pvc.create }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ printf "%s-%s" (include "common.fullname" $) $v.name }}
+  labels:
+    {{- include "common.labels" $ | nindent 4 }}
+spec:
+  accessModes:
+    {{- toYaml $v.pvc.accessModes | nindent 4 }}
+  {{- $storageClass := $v.pvc.storageClassName | default $.Values.storageClassName }}
+  {{- if $storageClass }}
+  storageClassName: {{ $storageClass }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ $v.pvc.size }}
+---
+{{- end }}
+{{- end }}
+{{- end }}

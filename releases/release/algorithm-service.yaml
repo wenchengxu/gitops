@@ -1,0 +1,9 @@
+appName: algorithm-service
+envName: release
+cluster: release-cluster-a
+type: algorithm
+
+image:
+  tag: release-initial
+
+enabled: false

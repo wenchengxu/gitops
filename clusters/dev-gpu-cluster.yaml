@@ -1,0 +1,30 @@
+clusterName: dev-gpu-cluster
+server: https://kubernetes.default.svc
+
+namespacePrefix: dev
+
+ingress:
+  className: nginx
+  domainSuffix: dev.example.com
+
+imagePullSecrets:
+  - name: harbor-secret
+
+storageClassName: nfs-client
+
+capabilities:
+  gpu: true
+  rwx: true
+
+nfsServers:
+  main:
+    server: 10.110.128.13
+    path: /bayuegua-nfs/dev
+
+nodeSelector:
+  accelerator: nvidia
+
+tolerations:
+  - key: nvidia.com/gpu
+    operator: Exists
+    effect: NoSchedule

@@ -1,0 +1,30 @@
+appName: algorithm-service
+type: algorithm
+chart: common-algorithm
+
+image:
+  repository: harbor.example.com/algorithm/algorithm-service
+
+containerPort: 9000
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 9000
+  targetPort: 9000
+
+ingress:
+  enabled: true
+  path: /
+
+readinessProbe:
+  enabled: true
+  path: /health
+  initialDelaySeconds: 120
+
+livenessProbe:
+  enabled: true
+  path: /health
+  initialDelaySeconds: 180
+
+owner: algorithm-team

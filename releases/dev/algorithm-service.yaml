@@ -1,0 +1,9 @@
+appName: algorithm-service
+envName: dev
+cluster: dev-cluster-a
+type: algorithm
+
+image:
+  tag: dev-initial
+
+enabled: true

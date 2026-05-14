@@ -1,0 +1,23 @@
+appName: user-service
+type: backend
+chart: common-backend
+
+image:
+  repository: harbor.example.com/backend/user-service
+
+containerPort: 8080
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+
+ingress:
+  enabled: true
+  path: /
+
+health:
+  path: /actuator/health
+
+owner: backend-team
